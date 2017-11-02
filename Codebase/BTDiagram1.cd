@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BT_and_RL.Behaviour_Tree.BTTask" Collapsed="true">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTCondition" Collapsed="true">
+    <Position X="9.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTSelector" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTShuffleSelector" Collapsed="true">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTSequence" Collapsed="true">
+    <Position X="11.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTShuffleSequence" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTDecorator" Collapsed="true">
+    <Position X="7.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="BT_and_RL.Behaviour_Tree.StatusValue" Collapsed="true">
+    <Position X="14.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

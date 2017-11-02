@@ -38,10 +38,13 @@ namespace BT_and_RL
             abstract public bool CheckCondition();
         }
 
-        //Base class for an action to perform
-        //abstract class BTAction : BTTask
-        //{
-        //}
+        //Base class for a single action to perform (leaf node)
+        abstract class BTAction
+        {
+            private StatusValue status;
+
+            abstract public bool PerformAction();
+        }
 
         //Stops at first successful action
         class BTSelector : BTTask
@@ -51,13 +54,12 @@ namespace BT_and_RL
                 status = StatusValue.RUNNING;
                 foreach (BTTask c in children)
                 {
-
                     if (c.Run() == StatusValue.SUCCESS)
                     {
                         status = StatusValue.SUCCESS;
                         return status;
                     }
-                }
+                }                
                 status = StatusValue.FAILED;
                 return status;
             }
@@ -119,11 +121,12 @@ namespace BT_and_RL
             }
         }
 
-        //Decorator node
+        //Decorator node - only has one child
         class BTDecorator : BTTask
         {
             public override StatusValue Run()
             {
+                status = StatusValue.RUNNING;
                 if(children.Count > 0)
                 {
                     if(children[0].Run() == StatusValue.SUCCESS)
@@ -135,6 +138,13 @@ namespace BT_and_RL
                 return StatusValue.FAILED;
             }
         }
+
+        //Decorator that inverts the its child's return value
+        class BTInverter : BTDecorator
+        {
+
+        }
+
 
         //Decorator node that guards a thread INCOMPLETE
         /*

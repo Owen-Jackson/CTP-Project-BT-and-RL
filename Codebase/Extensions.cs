@@ -17,7 +17,6 @@ namespace CustomExtensions
     }
 
     //from Eric J. at https://stackoverflow.com/questions/273313/randomize-a-listt
-
     public static class MyExtensions
     {
         public static void Shuffle<T>(this IList<T> list)
