@@ -3,7 +3,7 @@
   <Class Name="BT_and_RL.Behaviour_Tree.BTTask" Collapsed="true">
     <Position X="6" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <HashCode>AAQAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAI=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -45,14 +45,42 @@
   <Class Name="BT_and_RL.Behaviour_Tree.BTDecorator" Collapsed="true">
     <Position X="7.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTAction" Collapsed="true">
+    <Position X="14.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTInverter" Collapsed="true">
+    <Position X="8" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Enum Name="BT_and_RL.Behaviour_Tree.StatusValue" Collapsed="true">
-    <Position X="14.25" Y="0.5" Width="1.5" />
+  <Class Name="BT_and_RL.Behaviour_Tree.BTSemaphoreGuard" Collapsed="true">
+    <Position X="10.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>IAAAAACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.BTParallel" Collapsed="true">
+    <Position X="6" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAABAAAAAAAAAAAAAAAAAAEAAAACAI=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="BT_and_RL.Behaviour_Tree.StatusValue" Collapsed="true">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAACAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAQAAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Enum>
