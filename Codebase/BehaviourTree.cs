@@ -19,13 +19,28 @@ namespace BT_and_RL
             RUNNING,
         }
 
+        //Class for the main tree to inherit from. Contains the nodes as a set of children
+        class BTTree
+        {
+            protected List<BTTask> children;
+
+            //Each frame tick the tree once
+            public void Tick()
+            {
+                foreach(BTTask c in children)
+                {
+                    c.Tick();
+                }
+            }
+        }
+
         //Base class for any task within a Behaviour Tree
         class BTTask
         {
             protected StatusValue status;
             protected List<BTTask> children;
 
-            virtual public StatusValue Run()
+            virtual public StatusValue Tick()
             {
                 status = StatusValue.RUNNING;
                 return status;
@@ -54,12 +69,14 @@ namespace BT_and_RL
         //A composite task that stops at first successful action
         class BTSelector : BTTask
         {
-            public override StatusValue Run()
+            private BTTask currentChild = null;
+
+            public override StatusValue Tick()
             {
                 status = StatusValue.RUNNING;
                 foreach (BTTask c in children)
                 {
-                    if (c.Run() == StatusValue.SUCCESS)
+                    if (c.Tick() == StatusValue.SUCCESS)
                     {
                         status = StatusValue.SUCCESS;
                         return status;
@@ -73,12 +90,12 @@ namespace BT_and_RL
         //Selector that randomises list before checking
         class BTShuffleSelector : BTTask
         {
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 children.Shuffle();
                 foreach (BTTask c in children)
                 {
-                    if(c.Run() == StatusValue.SUCCESS)
+                    if(c.Tick() == StatusValue.SUCCESS)
                     {
                         status = StatusValue.SUCCESS;
                         return status;
@@ -92,11 +109,11 @@ namespace BT_and_RL
         //A composite task that stops at first failed action
         class BTSequence : BTTask
         {
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 foreach (BTTask c in children)
                 {
-                    if (c.Run() != StatusValue.SUCCESS)
+                    if (c.Tick() != StatusValue.SUCCESS)
                     {
                         status = StatusValue.FAILED;
                         return status;
@@ -110,12 +127,12 @@ namespace BT_and_RL
         //Sequence that randomises list before checking
         class BTShuffleSequence : BTTask
         {
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 children.Shuffle();
                 foreach(BTTask c in children)
                 {
-                    if(c.Run() != StatusValue.SUCCESS)
+                    if(c.Tick() != StatusValue.SUCCESS)
                     {
                         status = StatusValue.FAILED;
                         return status;
@@ -134,7 +151,7 @@ namespace BT_and_RL
 
             StatusValue result;
 
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 result = StatusValue.NULL;
 
@@ -155,7 +172,7 @@ namespace BT_and_RL
             protected void RunChild(BTTask child)
             {
                 running_children.Add(child);
-                StatusValue returned = child.Run();
+                StatusValue returned = child.Tick();
                 running_children.Remove(child);
 
                 //If the child fails, terminate
@@ -185,12 +202,12 @@ namespace BT_and_RL
         class BTDecorator : BTTask
         {
             protected BTTask child = null;
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 status = StatusValue.RUNNING;
                 if(child != null)
                 {
-                    if(child.Run() == StatusValue.SUCCESS)
+                    if(child.Tick() == StatusValue.SUCCESS)
                     {
                         status = StatusValue.SUCCESS;
                         return status;
@@ -203,10 +220,10 @@ namespace BT_and_RL
         //Decorator that inverts the its child's return value
         class BTInverter : BTDecorator
         {
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 status = StatusValue.RUNNING;
-                status = base.Run();
+                status = base.Tick();
                 //Invert the result of the child node
                 if(status == StatusValue.SUCCESS)
                 {
@@ -232,11 +249,11 @@ namespace BT_and_RL
                 this.semaphore = semaphore;
             }
 
-            public override StatusValue Run()
+            public override StatusValue Tick()
             {
                 if(semaphore.WaitOne())
                 {
-                    status = child.Run();
+                    status = child.Tick();
                     semaphore.Release();
                     return status;
                 }
