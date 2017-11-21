@@ -19,18 +19,21 @@ namespace BT_and_RL
             RUNNING,
         }
 
-        //Class for the main tree to inherit from. Contains the nodes as a set of children
+        //Class for the main tree to inherit from. This is the root node of the tree and it should only have one child
         class BTTree
         {
-            protected List<BTTask> children;
+            private StatusValue status;
+            private BTTask child;
 
-            //Each frame tick the tree once
+            public void BeginTree()
+            {
+                status = StatusValue.RUNNING;
+            }
+
+            //Each frame ticks the tree once
             public void Tick()
             {
-                foreach(BTTask c in children)
-                {
-                    c.Tick();
-                }
+                child.Tick();
             }
         }
 
@@ -39,6 +42,12 @@ namespace BT_and_RL
         {
             protected StatusValue status;
             protected List<BTTask> children;
+
+            //called when first ticked to set it as running
+            virtual public void Begin()
+            {
+                status = StatusValue.RUNNING;
+            }
 
             virtual public StatusValue Tick()
             {
@@ -76,9 +85,9 @@ namespace BT_and_RL
                 status = StatusValue.RUNNING;
                 foreach (BTTask c in children)
                 {
-                    if (c.Tick() == StatusValue.SUCCESS)
+                    status = c.Tick();
+                    if(status != StatusValue.FAILED)
                     {
-                        status = StatusValue.SUCCESS;
                         return status;
                     }
                 }                
@@ -95,9 +104,9 @@ namespace BT_and_RL
                 children.Shuffle();
                 foreach (BTTask c in children)
                 {
-                    if(c.Tick() == StatusValue.SUCCESS)
+                    status = c.Tick();
+                    if(status != StatusValue.FAILED)
                     {
-                        status = StatusValue.SUCCESS;
                         return status;
                     }
                 }
@@ -113,9 +122,9 @@ namespace BT_and_RL
             {
                 foreach (BTTask c in children)
                 {
-                    if (c.Tick() != StatusValue.SUCCESS)
+                    status = c.Tick();
+                    if(status != StatusValue.SUCCESS)
                     {
-                        status = StatusValue.FAILED;
                         return status;
                     }
                 }
@@ -132,9 +141,9 @@ namespace BT_and_RL
                 children.Shuffle();
                 foreach(BTTask c in children)
                 {
-                    if(c.Tick() != StatusValue.SUCCESS)
+                    status = c.Tick();
+                    if (status != StatusValue.SUCCESS)
                     {
-                        status = StatusValue.FAILED;
                         return status;
                     }
                 }
@@ -207,9 +216,9 @@ namespace BT_and_RL
                 status = StatusValue.RUNNING;
                 if(child != null)
                 {
-                    if(child.Tick() == StatusValue.SUCCESS)
+                    status = child.Tick();
+                    if (status != StatusValue.FAILED)
                     {
-                        status = StatusValue.SUCCESS;
                         return status;
                     }
                 }
