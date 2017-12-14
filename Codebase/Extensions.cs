@@ -9,10 +9,10 @@ namespace CustomExtensions
     //from Eric J. at https://stackoverflow.com/questions/273313/randomize-a-listt
     public static class ThreadSafeRandom
     {
-        [ThreadStatic] private static Random local;
-        public static Random ThisThreadsRandom
+        [ThreadStatic] private static System.Random local;
+        public static System.Random ThisThreadsRandom
         {
-            get { return local ?? (local = new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId))); }
+            get { return local ?? (local = new System.Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId))); }
         }
     }
 

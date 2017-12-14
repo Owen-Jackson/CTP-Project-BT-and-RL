@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
+using UnityEngine;
 using CustomExtensions;
 
 namespace BT_and_RL
@@ -11,7 +12,7 @@ namespace BT_and_RL
     //namespace used for behaviour trees
     namespace Behaviour_Tree
     {
-        enum StatusValue
+        public enum StatusValue
         {
             NULL = 0,
             SUCCESS,
@@ -20,10 +21,17 @@ namespace BT_and_RL
         }
 
         //Class for the main tree to inherit from. This is the root node of the tree and it should only have one child
-        class BTTree
+        [Serializable]
+        public class BTTree
         {
-            private StatusValue status;
-            private BTTask child;
+            protected StatusValue status;
+            protected BTTask child;
+
+            public BTTree(BTTask root)
+            {
+                child = root;
+                BeginTree();
+            }
 
             public void BeginTree()
             {
@@ -33,15 +41,20 @@ namespace BT_and_RL
             //Each frame ticks the tree once
             public void Tick()
             {
-                child.Tick();
+                status = child.Tick();
+            }
+
+            public StatusValue GetStatus()
+            {
+                return status;
             }
         }
 
         //Base class for any task within a Behaviour Tree
-        class BTTask
+        [Serializable]
+        public class BTTask
         {
             protected StatusValue status;
-            protected List<BTTask> children;
 
             //called when first ticked to set it as running
             virtual public void Begin()
@@ -59,46 +72,82 @@ namespace BT_and_RL
             {
                 status = StatusValue.FAILED;
             }
+
+            public StatusValue GetStatus()
+            {
+                return status;
+            }
+
+            //public void AddChild(BTTask newChild)
+            //{
+            //    children.Add(newChild);
+            //}
         }
 
         //Base class for a condition check
-        abstract class BTCondition : BTTask
+        [Serializable]
+        public abstract class BTCondition : BTTask
         {
             abstract public bool CheckCondition();
         }
 
         //Base class for a single action to perform (leaf node)
-        abstract class BTAction : BTTask
+        [Serializable]
+        public abstract class BTAction : BTTask
         {
-            private StatusValue status;
+            protected StatusValue status;
 
             abstract public StatusValue PerformAction();
         }
 
         //A composite task that stops at first successful action
-        class BTSelector : BTTask
+        [Serializable]
+        public class BTSelector : BTTask
         {
-            private BTTask currentChild = null;
+            protected int currentChildIndex = 0;
+            protected List<BTTask> children = new List<BTTask>();
+
+            public BTSelector(List<BTTask> tasks)
+            {
+                children = tasks;
+            }
+
+            public void Initialise()
+            {
+                currentChildIndex = 0;
+            }
 
             public override StatusValue Tick()
             {
-                status = StatusValue.RUNNING;
-                foreach (BTTask c in children)
+                currentChildIndex = 0;
+                for (int i = 0; i < children.Count; i++)
                 {
-                    status = c.Tick();
-                    if(status != StatusValue.FAILED)
+                    if (i == currentChildIndex)
                     {
-                        return status;
+                        status = children[i].Tick();
+                        if (status != StatusValue.FAILED)
+                        {
+                            return status;
+                        }
                     }
-                }                
+                    currentChildIndex++;
+                }
                 status = StatusValue.FAILED;
                 return status;
             }
         }
 
         //Selector that randomises list before checking
-        class BTShuffleSelector : BTTask
+        [Serializable]
+        public class BTShuffleSelector : BTTask
         {
+            protected List<BTTask> children = new List<BTTask>();
+
+            public BTShuffleSelector(List<BTTask> tasks)
+            {
+                children = tasks;
+            }
+
             public override StatusValue Tick()
             {
                 children.Shuffle();
@@ -116,17 +165,36 @@ namespace BT_and_RL
         }
 
         //A composite task that stops at first failed action
-        class BTSequence : BTTask
+        [Serializable]
+        public class BTSequence : BTTask
         {
+            protected int currentChildIndex = 0;
+            protected List<BTTask> children = new List<BTTask>();
+
+            public BTSequence(List<BTTask> tasks)
+            {
+                children = tasks;
+            }
+
+            public void Initialise()
+            {
+                currentChildIndex = 0;
+            }
+
             public override StatusValue Tick()
             {
-                foreach (BTTask c in children)
+                currentChildIndex = 0;
+                for(int i = 0; i < children.Count(); i++)
                 {
-                    status = c.Tick();
-                    if(status != StatusValue.SUCCESS)
+                    if (i == currentChildIndex)
                     {
-                        return status;
+                        status = children[i].Tick();
+                        if (status != StatusValue.SUCCESS)
+                        {
+                            return status;
+                        }
                     }
+                    currentChildIndex++;
                 }
                 status = StatusValue.SUCCESS;
                 return status;
@@ -134,8 +202,16 @@ namespace BT_and_RL
         }
 
         //Sequence that randomises list before checking
-        class BTShuffleSequence : BTTask
+        [Serializable]
+        public class BTShuffleSequence : BTTask
         {
+            protected List<BTTask> children = new List<BTTask>();
+
+            public BTShuffleSequence(List<BTTask> tasks)
+            {
+                children = tasks;
+            }
+
             public override StatusValue Tick()
             {
                 children.Shuffle();
@@ -153,12 +229,19 @@ namespace BT_and_RL
         }
 
         //A parallel task that runs its children concurrently
-        class BTParallel : BTTask
+        [Serializable]
+        public class BTParallel : BTTask
         {
             //List of children currently running
             protected List<BTTask> running_children;
 
             StatusValue result;
+            protected List<BTTask> children = new List<BTTask>();
+
+            public BTParallel(List<BTTask> tasks)
+            {
+                children = tasks;
+            }
 
             public override StatusValue Tick()
             {
@@ -208,9 +291,15 @@ namespace BT_and_RL
         }
 
         //A decorator task that only has one child
-        class BTDecorator : BTTask
+        public class BTDecorator : BTTask
         {
             protected BTTask child = null;
+
+            public BTDecorator(BTTask task)
+            {
+                child = task;
+            }
+
             public override StatusValue Tick()
             {
                 status = StatusValue.RUNNING;
@@ -227,8 +316,14 @@ namespace BT_and_RL
         }
 
         //Decorator that inverts the its child's return value
-        class BTInverter : BTDecorator
+        [Serializable]
+        public class BTInverter : BTDecorator
         {
+            public BTInverter(BTTask task) : base(task)
+            {
+                child = task;
+            }
+
             public override StatusValue Tick()
             {
                 status = StatusValue.RUNNING;
@@ -247,14 +342,16 @@ namespace BT_and_RL
                 return status;
             }
         }
-        
-        //Decorator node that guards a thread
-        class BTSemaphoreGuard : BTDecorator
-        {
-            private Semaphore semaphore;
 
-            BTSemaphoreGuard(Semaphore semaphore)
+        //Decorator node that guards a thread
+        [Serializable]
+        public class BTSemaphoreGuard : BTDecorator
+        {
+            protected Semaphore semaphore;
+
+            BTSemaphoreGuard(BTTask task, Semaphore semaphore) : base(task)
             {
+                child = task;
                 this.semaphore = semaphore;
             }
 
