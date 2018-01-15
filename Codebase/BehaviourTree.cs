@@ -55,6 +55,7 @@ namespace BT_and_RL
         public class BTTask
         {
             protected StatusValue status;
+            protected string taskName;
 
             //called when first ticked to set it as running
             virtual public void Begin()
