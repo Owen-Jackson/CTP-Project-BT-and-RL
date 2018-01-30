@@ -25,6 +25,7 @@ namespace BT_and_RL
         public class BTTree
         {
             protected StatusValue status;
+            [SerializeField]
             protected BTTask child;
 
             public BTTree(BTTask root)
@@ -54,7 +55,9 @@ namespace BT_and_RL
         [Serializable]
         public class BTTask
         {
+            [SerializeField]
             protected StatusValue status;
+            [SerializeField]
             protected string taskName;
 
             //called when first ticked to set it as running
@@ -77,6 +80,11 @@ namespace BT_and_RL
             public StatusValue GetStatus()
             {
                 return status;
+            }
+
+            public string GetName()
+            {
+                return taskName;
             }
 
             //public void AddChild(BTTask newChild)
@@ -106,6 +114,7 @@ namespace BT_and_RL
         public class BTSelector : BTTask
         {
             protected int currentChildIndex = 0;
+            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTSelector(List<BTTask> tasks)
@@ -142,6 +151,7 @@ namespace BT_and_RL
         [Serializable]
         public class BTShuffleSelector : BTTask
         {
+            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTShuffleSelector(List<BTTask> tasks)
@@ -170,6 +180,7 @@ namespace BT_and_RL
         public class BTSequence : BTTask
         {
             protected int currentChildIndex = 0;
+            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTSequence(List<BTTask> tasks)
@@ -206,6 +217,7 @@ namespace BT_and_RL
         [Serializable]
         public class BTShuffleSequence : BTTask
         {
+            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTShuffleSequence(List<BTTask> tasks)
@@ -237,6 +249,7 @@ namespace BT_and_RL
             protected List<BTTask> running_children;
 
             StatusValue result;
+            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTParallel(List<BTTask> tasks)
@@ -294,6 +307,7 @@ namespace BT_and_RL
         //A decorator task that only has one child
         public class BTDecorator : BTTask
         {
+            [SerializeField]
             protected BTTask child = null;
 
             public BTDecorator(BTTask task)
