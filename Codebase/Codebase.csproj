@@ -46,6 +46,7 @@
     <Compile Include="BehaviourTree.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReinforcementLearning.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BTClassStructure.cd" />
