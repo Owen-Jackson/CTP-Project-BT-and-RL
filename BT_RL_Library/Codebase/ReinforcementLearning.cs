@@ -17,6 +17,8 @@ namespace BT_and_RL
             [SerializeField]
             protected Dictionary<string, StateClass> states;
 
+            [SerializeField]
+            private int m_stepsCompleted = 0;
             public int StepsCompleted
             {
                 get
@@ -28,9 +30,9 @@ namespace BT_and_RL
                     m_stepsCompleted = value;
                 }
             }
+
             [SerializeField]
-            private int m_stepsCompleted = 0;
-            
+            private int m_stepsInEpisode = 200;
             public int StepsInEpisode
             {
                 get
@@ -42,9 +44,9 @@ namespace BT_and_RL
                     m_stepsInEpisode = value;
                 }
             }
-            [SerializeField]
-            private int m_stepsInEpisode = 200;
 
+            [SerializeField]
+            private float m_gammaDiscountFactor = 0.8f;
             public float GammaDiscountFactor
             {
                 get
@@ -56,9 +58,9 @@ namespace BT_and_RL
                     m_gammaDiscountFactor = value;
                 }
             }
-            [SerializeField]
-            private float m_gammaDiscountFactor = 0.8f;
 
+            [SerializeField]
+            private List<StateClass> m_statesList;  //stores all states that the AI can be in
             public List<StateClass> StatesList
             {
                 get
@@ -70,9 +72,9 @@ namespace BT_and_RL
                     m_statesList = value;
                 }
             }
-            [SerializeField]
-            private List<StateClass> m_statesList;  //stores all states that the AI can be in
 
+            [SerializeField]
+            private float m_learningRate = 0.5f;    //How fast this node learns
             public float LearningRate
             {
                 get
@@ -84,11 +86,9 @@ namespace BT_and_RL
                     m_learningRate = value;
                 }
             }
-            [SerializeField]
-            private float m_learningRate = 0.5f;    //How fast this node learns
-
 
             [SerializeField]
+            private float m_maxEpsilon = 1.0f; //used for random action selection
             public float MaxEpsilon
             {
                 get
@@ -100,9 +100,9 @@ namespace BT_and_RL
                     m_maxEpsilon = value;
                 }
             }
-            [SerializeField]
-            private float m_maxEpsilon = 1.0f; //used for random action selection
 
+            [SerializeField]
+            private float m_minEpsilon = 0.1f;  //min epsilon value
             public float MinEpsilon
             {
                 get
@@ -114,9 +114,9 @@ namespace BT_and_RL
                     m_minEpsilon = value;
                 }
             }
-            [SerializeField]
-            private float m_minEpsilon = 0.1f;  //min epsilon value
 
+            [SerializeField]
+            private string m_currentState;
             public string CurrentState
             {
                 get
@@ -128,9 +128,9 @@ namespace BT_and_RL
                     m_currentState = value;
                 }
             }
-            [SerializeField]
-            private string m_currentState;
 
+            [SerializeField]
+            private string m_previousState;
             public string PreviousState
             {
                 get
@@ -142,9 +142,9 @@ namespace BT_and_RL
                     m_previousState = value;
                 }
             }
-            [SerializeField]
-            private string m_previousState;
 
+            [SerializeField]
+            private string m_currentActionName;
             public string CurrentActionName
             {
                 get
@@ -156,9 +156,9 @@ namespace BT_and_RL
                     m_currentActionName = value;
                 }
             }
-            [SerializeField]
-            private string m_currentActionName;
 
+            [SerializeField]
+            private int m_currentActionIndex;
             public int CurrentActionIndex
             {
                 get
@@ -170,8 +170,6 @@ namespace BT_and_RL
                     m_currentActionIndex = value;
                 }
             }
-            [SerializeField]
-            private int m_currentActionIndex;
 
             public RLSelector(List<BTTask> tasks, int numOfSteps) : base(tasks)
             {
@@ -223,6 +221,32 @@ namespace BT_and_RL
                 }
             }
 
+            public void CheckIfUsingRandomAction()
+            {
+                //create an rng using the thread safe random extension
+                System.Random random = CustomExtensions.ThreadSafeRandom.ThisThreadsRandom;
+                if ((float)random.NextDouble() < states[CurrentState].Epsilon)
+                {
+                    CurrentActionIndex = random.Next(0, children.Count);
+                    CurrentActionName = children[CurrentActionIndex].GetName();    //random
+
+                }
+                else
+                {
+                    //Find the best action from the Q value table
+                    CurrentActionName = states[CurrentState].GetScoresList().Where(x => x.Value == states[CurrentState].GetScoresList().Max(y => y.Value)).Select(z => z.Key).First(); //max value
+                    CurrentActionIndex = children.IndexOf(children.Find(x => x.GetName() == CurrentActionName));
+                    //Debug.Log("current best action: " + CurrentActionName);
+                }
+                //decrease the epsilon value to reduce future probability
+                if (states[CurrentState].Epsilon > MinEpsilon)
+                {
+                    states[CurrentState].Epsilon -= (1f - MinEpsilon) / StepsInEpisode;
+                    //Debug.Log("current epsilon: " + Epsilon);
+                }
+            }
+
+            //Returns the name of the highest valued action
             protected string FindBestAction()
             {
                 string bestAction = "";
@@ -231,6 +255,17 @@ namespace BT_and_RL
 
                 return bestAction;
             }
+
+            /*public override StatusValue Tick()
+            {
+                if(children.Count == 0)
+                {
+
+                }
+                    
+                return StatusValue.FAILED;
+            }
+            */
         }
 
         //Used to store the variables for the Q-Learning states
@@ -256,7 +291,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private int m_episodesToComplete = 500;
+            private int m_episodesToComplete = 500; //Each state can learn at an individual rate, meaning the AI can remember how much it has learned with a skill already
             public int EpisodeCount
             {
                 get
@@ -269,7 +304,7 @@ namespace BT_and_RL
                 }
             }
 
-            public bool displayedFinalResults = false;
+            public bool DisplayedFinalResults { get; set; } = false;
 
             public StateClass(string name, List<BTTask> tasks, float startingEpsilon)
             {
@@ -326,6 +361,31 @@ namespace BT_and_RL
                     m_scoreValues.Add(actionName, 0);
                 }
             }
+        }
+
+        public class ActionPool : CustomExtensions.Singleton
+        {
+            public Dictionary<string, Type> actionPool;
+
+            public ActionPool()
+            {
+
+                actionPool = new Dictionary<string, Type>();
+                System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                for (int i = 0; i < assemblies.Length; i++)
+                {
+                    Type[] actions = assemblies[i].GetTypes().Where(t => t.IsSubclassOf(typeof(BTAction))).ToArray();
+                    for (int j = 0; j < actions.Length; j++)
+                    {
+                        Debug.Log("adding " + actions[i].Name + "to the action pool");
+                        if (!actionPool.ContainsValue(actions[j]))
+                        {
+                            actionPool.Add(actions[j].Name, actions[j].GetType());
+                        }
+                    }
+                }
+            }
+                //System.Reflection.Assembly.GetAssembly().GetTypes().Where(t => t.IsSubclassOf())
         }
     }
 }

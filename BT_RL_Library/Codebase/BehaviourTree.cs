@@ -20,6 +20,40 @@ namespace BT_and_RL
             RUNNING,
         }
 
+        //Blackboard class used by the tree to read and write information that this agent knows
+        //NOTE: Might not be thread-safe yet (will look into if it becomes a problem)
+        [Serializable]
+        public class Blackboard
+        {
+            protected Dictionary<string, object> memory;
+
+            public Blackboard()
+            {
+                memory = new Dictionary<string, object>();
+            }
+
+            public object GetValue(string valueName)
+            {
+                if (memory.ContainsKey(valueName))
+                {
+                    return memory[valueName];
+                }
+                return null;
+            }
+
+            public void SetValue(string valueName, object newValue)
+            {
+                if(memory.ContainsKey(valueName))
+                {
+                    memory[valueName] = newValue;
+                }
+                else
+                {
+                    memory.Add(valueName, newValue);
+                }
+            }
+        }
+
         //Class for the main tree to inherit from. This is the root node of the tree and it should only have one child
         [Serializable]
         public class BTTree
@@ -27,9 +61,16 @@ namespace BT_and_RL
             protected StatusValue status;
             [SerializeField]
             protected BTTask child;
+            protected Blackboard blackboard;
+            public Blackboard Blackboard
+            {
+                get { return blackboard; }
+                set { blackboard = value; }
+            }
 
             public BTTree(BTTask root)
             {
+                blackboard = new Blackboard();
                 child = root;
                 BeginTree();
             }
@@ -42,7 +83,7 @@ namespace BT_and_RL
             //Each frame ticks the tree once
             public void Tick()
             {
-                status = child.Tick();
+                status = child.Tick(blackboard);
             }
 
             public StatusValue GetStatus()
@@ -66,7 +107,7 @@ namespace BT_and_RL
                 status = StatusValue.RUNNING;
             }
 
-            virtual public StatusValue Tick()
+            virtual public StatusValue Tick(Blackboard blackboard)
             {
                 status = StatusValue.RUNNING;
                 return status;
@@ -101,12 +142,16 @@ namespace BT_and_RL
         }
 
         //Base class for a single action to perform (leaf node)
+        //This class is no different to a BTTask, however it is used by the system to differentiate between
+        //a character action and a general BTTask class.
+        //This is how the action pool is filled
         [Serializable]
         public abstract class BTAction : BTTask
         {
-            protected StatusValue status;
+            public BTAction()
+            {
 
-            abstract public StatusValue PerformAction();
+            }
         }
 
         //A composite task that stops at first successful action
@@ -127,14 +172,14 @@ namespace BT_and_RL
                 currentChildIndex = 0;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 currentChildIndex = 0;
                 for (int i = 0; i < children.Count; i++)
                 {
                     if (i == currentChildIndex)
                     {
-                        status = children[i].Tick();
+                        status = children[i].Tick(blackboard);
                         if (status != StatusValue.FAILED)
                         {
                             return status;
@@ -159,12 +204,12 @@ namespace BT_and_RL
                 children = tasks;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 children.Shuffle();
                 foreach (BTTask c in children)
                 {
-                    status = c.Tick();
+                    status = c.Tick(blackboard);
                     if(status != StatusValue.FAILED)
                     {
                         return status;
@@ -193,14 +238,14 @@ namespace BT_and_RL
                 currentChildIndex = 0;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 currentChildIndex = 0;
                 for(int i = 0; i < children.Count(); i++)
                 {
                     if (i == currentChildIndex)
                     {
-                        status = children[i].Tick();
+                        status = children[i].Tick(blackboard);
                         if (status != StatusValue.SUCCESS)
                         {
                             return status;
@@ -225,12 +270,12 @@ namespace BT_and_RL
                 children = tasks;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 children.Shuffle();
                 foreach(BTTask c in children)
                 {
-                    status = c.Tick();
+                    status = c.Tick(blackboard);
                     if (status != StatusValue.SUCCESS)
                     {
                         return status;
@@ -257,13 +302,13 @@ namespace BT_and_RL
                 children = tasks;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 result = StatusValue.NULL;
 
                 foreach(BTTask c in children)
                 {
-                    Thread thread = new Thread(() => RunChild(c));
+                    Thread thread = new Thread(() => RunChild(c, blackboard));
                     thread.Start();
                 }
                 //Sleep this thread between checks for completion
@@ -275,10 +320,10 @@ namespace BT_and_RL
             }
 
             //Runs the current child in its own thread
-            protected void RunChild(BTTask child)
+            protected void RunChild(BTTask child, Blackboard blackboard)
             {
                 running_children.Add(child);
-                StatusValue returned = child.Tick();
+                StatusValue returned = child.Tick(blackboard);
                 running_children.Remove(child);
 
                 //If the child fails, terminate
@@ -315,12 +360,12 @@ namespace BT_and_RL
                 child = task;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 status = StatusValue.RUNNING;
                 if(child != null)
                 {
-                    status = child.Tick();
+                    status = child.Tick(blackboard);
                     if (status != StatusValue.FAILED)
                     {
                         return status;
@@ -339,10 +384,10 @@ namespace BT_and_RL
                 child = task;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 status = StatusValue.RUNNING;
-                status = base.Tick();
+                status = base.Tick(blackboard);
                 //Invert the result of the child node
                 if(status == StatusValue.SUCCESS)
                 {
@@ -370,11 +415,11 @@ namespace BT_and_RL
                 this.semaphore = semaphore;
             }
 
-            public override StatusValue Tick()
+            public override StatusValue Tick(Blackboard blackboard)
             {
                 if(semaphore.WaitOne())
                 {
-                    status = child.Tick();
+                    status = child.Tick(blackboard);
                     semaphore.Release();
                     return status;
                 }

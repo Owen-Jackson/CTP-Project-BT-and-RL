@@ -33,4 +33,26 @@ namespace CustomExtensions
         }
     }
 
+    //Inherit from this if the class is a singleton
+    public class Singleton
+    {        
+        private static Singleton instance;
+        public static Singleton Instance
+        {
+            get
+            {
+                if(instance == null)
+                {
+                    instance = new Singleton();
+                }
+                return instance;
+            }
+        }
+
+        public Singleton()
+        {
+
+        }
+    }
+
 }
