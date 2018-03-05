@@ -33,7 +33,8 @@ namespace CustomExtensions
         }
     }
 
-    //Inherit from this if the class is a singleton
+    /*
+    //This is the base code for a non thread-safe singleton class, copy and paste into a class to make it singleton
     public class Singleton
     {        
         private static Singleton instance;
@@ -54,5 +55,6 @@ namespace CustomExtensions
 
         }
     }
+    */
 
 }

@@ -25,7 +25,7 @@ namespace BT_and_RL
         [Serializable]
         public class Blackboard
         {
-            protected Dictionary<string, object> memory;
+            public Dictionary<string, object> memory;
 
             public Blackboard()
             {
@@ -101,6 +101,11 @@ namespace BT_and_RL
             [SerializeField]
             protected string taskName;
 
+            public BTTask()
+            {
+
+            }
+            
             //called when first ticked to set it as running
             virtual public void Begin()
             {
@@ -127,11 +132,6 @@ namespace BT_and_RL
             {
                 return taskName;
             }
-
-            //public void AddChild(BTTask newChild)
-            //{
-            //    children.Add(newChild);
-            //}
         }
 
         //Base class for a condition check
@@ -190,6 +190,15 @@ namespace BT_and_RL
                 status = StatusValue.FAILED;
                 return status;
             }
+
+            public virtual void AddTask(string taskName)
+            {
+                if(QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
+                {
+                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
+                }
+            }
+
         }
 
         //Selector that randomises list before checking
@@ -217,6 +226,14 @@ namespace BT_and_RL
                 }
                 status = StatusValue.FAILED;
                 return status;
+            }
+
+            public void AddTask(string taskName)
+            {
+                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
+                {
+                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
+                }
             }
         }
 
@@ -256,6 +273,14 @@ namespace BT_and_RL
                 status = StatusValue.SUCCESS;
                 return status;
             }
+
+            public virtual void AddTask(string taskName)
+            {
+                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
+                {
+                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
+                }
+            }
         }
 
         //Sequence that randomises list before checking
@@ -283,6 +308,14 @@ namespace BT_and_RL
                 }
                 status = StatusValue.SUCCESS;
                 return status;
+            }
+
+            public void AddTask(string taskName)
+            {
+                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
+                {
+                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
+                }
             }
         }
 
@@ -347,6 +380,14 @@ namespace BT_and_RL
                     c.Terminate();
                 }
             }
+            public void AddTask(string taskName)
+            {
+                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
+                {
+                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
+                }
+            }
+
         }
 
         //A decorator task that only has one child

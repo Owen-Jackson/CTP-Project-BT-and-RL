@@ -59,8 +59,9 @@ namespace BT_and_RL
                 }
             }
 
+            /*
             [SerializeField]
-            private List<StateClass> m_statesList;  //stores all states that the AI can be in
+            protected List<StateClass> m_statesList;  //stores all states that the AI can be in
             public List<StateClass> StatesList
             {
                 get
@@ -72,6 +73,7 @@ namespace BT_and_RL
                     m_statesList = value;
                 }
             }
+            */
 
             [SerializeField]
             private float m_learningRate = 0.5f;    //How fast this node learns
@@ -198,19 +200,39 @@ namespace BT_and_RL
             }
 
             //Add a new task to the selector
-            public void AddTask(BTTask newTask)
+            
+            public override void AddTask(string newTask)
             {
-                if (!children.Contains(newTask))
+                if (ActionPool.Instance.actionPool.ContainsKey(newTask))
                 {
-                    children.Add(newTask);
-                    //check that this new action is not already in the current state's list of possible actions
-                    if (m_statesList.Find(x => x.GetScoresList().ContainsKey(CurrentState)) != null)
+                    if (children.Find(t => t.GetType().Name == newTask) == null)
                     {
-                        //add it to the state's dictionary
-                        m_statesList.Find(x => x.GetName() == CurrentState).AddAction(newTask.GetName());
+                        //Debug.Log("gGOT IT ADDING NOW: " + ActionPool.Instance.actionPool[newTask].Name);
+                        object toAdd = Activator.CreateInstance(ActionPool.Instance.actionPool[newTask]);
+                        children.Add((BTTask)toAdd);
+
+                        //check that this new action is not already in the current state's list of possible actions
+                        if(!states[CurrentState].GetScoresList().ContainsKey(toAdd.GetType().Name))
+                        {
+                            states[CurrentState].AddAction(toAdd.GetType().Name);
+                        }
+                        /*if (m_statesList.Find(x => x.GetScoresList().ContainsKey(CurrentState)) != null)
+                        {
+                            //add it to the state's dictionary
+                            m_statesList.Find(x => x.GetName() == CurrentState).AddAction(newTask);
+                        }
+                        */
+                    }
+                    else
+                    {
+                        //Debug.Log("children already has this task");
                     }
                 }
-            }
+                else
+                {
+                    //Debug.Log("action pool doesn't have this name");
+                }
+            }            
 
             //Remove one of the selector's current tasks
             public void RemoveTask(BTTask taskToRemove)
@@ -228,14 +250,14 @@ namespace BT_and_RL
                 if ((float)random.NextDouble() < states[CurrentState].Epsilon)
                 {
                     CurrentActionIndex = random.Next(0, children.Count);
-                    CurrentActionName = children[CurrentActionIndex].GetName();    //random
+                    CurrentActionName = children[CurrentActionIndex].GetType().Name;    //random
 
                 }
                 else
                 {
                     //Find the best action from the Q value table
                     CurrentActionName = states[CurrentState].GetScoresList().Where(x => x.Value == states[CurrentState].GetScoresList().Max(y => y.Value)).Select(z => z.Key).First(); //max value
-                    CurrentActionIndex = children.IndexOf(children.Find(x => x.GetName() == CurrentActionName));
+                    CurrentActionIndex = children.IndexOf(children.Find(x => x.GetType().Name == CurrentActionName));
                     //Debug.Log("current best action: " + CurrentActionName);
                 }
                 //decrease the epsilon value to reduce future probability
@@ -276,6 +298,7 @@ namespace BT_and_RL
             private string m_stateName;
             [SerializeField]
             private Dictionary<string, float> m_scoreValues;    //relates an action (by its name) to a q value
+            private HashSet<Type> rejectedActions;  //stores any actions that are so bad that they should be avoided
             [SerializeField]
             private float m_epsilon; //The policy value for this state
             public float Epsilon
@@ -313,9 +336,10 @@ namespace BT_and_RL
                 m_scoreValues = new Dictionary<string, float>();
                 foreach (BTTask task in tasks)
                 {
-                    m_scoreValues.Add(task.GetName(), 0);
+                    m_scoreValues.Add(task.GetType().Name, 0);
                 }
                 Epsilon = startingEpsilon;
+                rejectedActions = new HashSet<Type>();
             }
 
             public Dictionary<string, float> GetScoresList()
@@ -361,15 +385,50 @@ namespace BT_and_RL
                     m_scoreValues.Add(actionName, 0);
                 }
             }
+
+            public void RejectAction(Type actionType)
+            {
+                if (!rejectedActions.Contains(actionType))
+                {
+                    rejectedActions.Add(actionType);
+                }
+            }
+
+            public bool CheckIfRejected(Type actionType)
+            {
+                if(rejectedActions.Contains(actionType))
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            public HashSet<Type> GetRejectedActions()
+            {
+                return rejectedActions;
+            }
         }
 
-        public class ActionPool : CustomExtensions.Singleton
+        public class ActionPool
         {
+            private static ActionPool instance;
+            public static ActionPool Instance
+            {
+                get
+                {
+                    if (instance == null)
+                    {
+                        instance = new ActionPool();
+                    }
+                    return instance;
+                }
+            }
+
             public Dictionary<string, Type> actionPool;
+            public bool isAvailable = false;  //going to be used if the constructor takes too long and creates issues
 
             public ActionPool()
             {
-
                 actionPool = new Dictionary<string, Type>();
                 System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 for (int i = 0; i < assemblies.Length; i++)
@@ -377,13 +436,32 @@ namespace BT_and_RL
                     Type[] actions = assemblies[i].GetTypes().Where(t => t.IsSubclassOf(typeof(BTAction))).ToArray();
                     for (int j = 0; j < actions.Length; j++)
                     {
-                        Debug.Log("adding " + actions[i].Name + "to the action pool");
-                        if (!actionPool.ContainsValue(actions[j]))
+                        //Debug.Log("adding " + actions[j].Name + " to the action pool");
+                        if (!actionPool.ContainsKey(actions[j].Name))
                         {
-                            actionPool.Add(actions[j].Name, actions[j].GetType());
+                            actionPool.Add(actions[j].Name, actions[j]);
                         }
                     }
                 }
+                isAvailable = true;
+            }
+
+            public object GetAction(string name)
+            {
+                if(actionPool.ContainsKey(name))
+                {
+                    return actionPool[name];
+                }
+                return "action not found";
+            }
+
+            public Type GetRandomAction()
+            {
+                int index = CustomExtensions.ThreadSafeRandom.ThisThreadsRandom.Next(0, actionPool.Count);
+                //Debug.Log("getting element number " + index);
+                Type get = actionPool.Values.ElementAt(CustomExtensions.ThreadSafeRandom.ThisThreadsRandom.Next(0, actionPool.Count));
+                //Debug.Log("received object " + get.Name);
+                return get;
             }
                 //System.Reflection.Assembly.GetAssembly().GetTypes().Where(t => t.IsSubclassOf())
         }
