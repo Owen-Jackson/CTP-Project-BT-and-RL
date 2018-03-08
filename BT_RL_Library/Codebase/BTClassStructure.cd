@@ -1,91 +1,98 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="BT_and_RL.Behaviour_Tree.BTTask" Collapsed="true">
-    <Position X="6" Y="0.5" Width="1.5" />
+    <Position X="6.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAQAA=</HashCode>
+      <HashCode>AAQAAAAAAAAEAAAAAAAAAAAEAAAAEAAAAAAEAAAARAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTCondition" Collapsed="true">
-    <Position X="9.5" Y="1.75" Width="1.5" />
+    <Position X="10" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTSelector" Collapsed="true">
-    <Position X="0.5" Y="1.75" Width="1.75" />
+    <Position X="1" Y="1.75" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAQAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAQQAAAAAAAAAAAAAAACAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTShuffleSelector" Collapsed="true">
-    <Position X="5" Y="1.75" Width="1.5" />
+    <Position X="5.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTSequence" Collapsed="true">
-    <Position X="11.75" Y="1.75" Width="1.5" />
+    <Position X="12.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAQQAAAAAAAAAAAAAAACAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTShuffleSequence" Collapsed="true">
-    <Position X="2.75" Y="1.75" Width="1.5" />
+    <Position X="3.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTDecorator" Collapsed="true">
-    <Position X="7.25" Y="1.75" Width="1.5" />
+    <Position X="7.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTAction" Collapsed="true">
-    <Position X="14.25" Y="1.75" Width="1.5" />
+    <Position X="14.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTInverter" Collapsed="true">
-    <Position X="8" Y="3.75" Width="1.5" />
+    <Position X="8.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTSemaphoreGuard" Collapsed="true">
-    <Position X="10.25" Y="3.75" Width="1.5" />
+    <Position X="10.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTParallel" Collapsed="true">
-    <Position X="6" Y="3.75" Width="1.5" />
+    <Position X="6.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAQAAAABAAAAAAAAAAAAAAAAAAEAAAASAA=</HashCode>
+      <HashCode>AAAAACAAAAAQAAQABAAAAAAAAAAAAAAAAAAEAAAASAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTTree" Collapsed="true">
-    <Position X="4" Y="0.5" Width="1.5" />
+    <Position X="4.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAQAQAAAAEAAAAAAAACIAAAEAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.Behaviour_Tree.Blackboard" Collapsed="true">
+    <Position X="2.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAgAAAAAAAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Enum Name="BT_and_RL.Behaviour_Tree.StatusValue" Collapsed="true">
-    <Position X="7.75" Y="0.5" Width="1.5" />
+    <Position X="8.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>IAAAAACAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAQAAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>

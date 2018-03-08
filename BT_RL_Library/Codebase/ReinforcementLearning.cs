@@ -216,12 +216,6 @@ namespace BT_and_RL
                         {
                             states[CurrentState].AddAction(toAdd.GetType().Name);
                         }
-                        /*if (m_statesList.Find(x => x.GetScoresList().ContainsKey(CurrentState)) != null)
-                        {
-                            //add it to the state's dictionary
-                            m_statesList.Find(x => x.GetName() == CurrentState).AddAction(newTask);
-                        }
-                        */
                     }
                     else
                     {
@@ -232,7 +226,26 @@ namespace BT_and_RL
                 {
                     //Debug.Log("action pool doesn't have this name");
                 }
-            }            
+            } 
+            
+            //if all states reject this task then there is no need for it here anymore
+            //returns true if the task is no longer needed
+            public bool IsTaskIsUseless(BTTask taskToCheck)
+            {
+                int rejectCount = 0;
+                foreach(StateClass state in states.Values)
+                {
+                    if(state.CheckIfRejected(taskToCheck.GetType()))
+                    {
+                        rejectCount++;
+                    }
+                }
+                if(rejectCount == states.Count)
+                {
+                    return true;
+                }
+                return false;
+            }
 
             //Remove one of the selector's current tasks
             public void RemoveTask(BTTask taskToRemove)
@@ -278,16 +291,10 @@ namespace BT_and_RL
                 return bestAction;
             }
 
-            /*public override StatusValue Tick()
+            protected float GetNewQValue(float reward, string maxArg)
             {
-                if(children.Count == 0)
-                {
-
-                }
-                    
-                return StatusValue.FAILED;
+                return (1 - LearningRate) * states[PreviousState].GetScoresList()[CurrentActionName] + LearningRate * (reward + GammaDiscountFactor * states[CurrentState].GetScoresList()[maxArg]);
             }
-            */
         }
 
         //Used to store the variables for the Q-Learning states
@@ -346,13 +353,6 @@ namespace BT_and_RL
             {
                 return m_scoreValues;
             }
-
-            /*
-            public void UpdateValueDisplays(string damageType)
-            {
-                Environment.Instance.SetQValue(m_stateName, damageType, m_scoreValues[damageType]);
-            }
-            */
 
             public string GetName()
             {
@@ -463,7 +463,6 @@ namespace BT_and_RL
                 //Debug.Log("received object " + get.Name);
                 return get;
             }
-                //System.Reflection.Assembly.GetAssembly().GetTypes().Where(t => t.IsSubclassOf())
         }
     }
 }
