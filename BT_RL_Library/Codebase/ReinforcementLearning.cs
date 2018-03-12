@@ -200,19 +200,22 @@ namespace BT_and_RL
             }
 
             //Add a new task to the selector
-            
             public override void AddTask(string newTask)
             {
                 if (ActionPool.Instance.actionPool.ContainsKey(newTask))
                 {
+                    //BTTask check = (BTTask)ActionPool.Instance.GetAction(newTask);
+                    //check that the task it is trying to add is suitable
+                    //if (check.IsTaskCompatible(this.compatibility))
+                    //{
                     if (children.Find(t => t.GetType().Name == newTask) == null)
                     {
-                        //Debug.Log("gGOT IT ADDING NOW: " + ActionPool.Instance.actionPool[newTask].Name);
+                        //Debug.Log("GOT IT ADDING NOW: " + ActionPool.Instance.actionPool[newTask].Name);
                         object toAdd = Activator.CreateInstance(ActionPool.Instance.actionPool[newTask]);
                         children.Add((BTTask)toAdd);
 
                         //check that this new action is not already in the current state's list of possible actions
-                        if(!states[CurrentState].GetScoresList().ContainsKey(toAdd.GetType().Name))
+                        if (!states[CurrentState].GetScoresList().ContainsKey(toAdd.GetType().Name))
                         {
                             states[CurrentState].AddAction(toAdd.GetType().Name);
                         }
@@ -222,12 +225,13 @@ namespace BT_and_RL
                         //Debug.Log("children already has this task");
                     }
                 }
+                //}
                 else
                 {
                     //Debug.Log("action pool doesn't have this name");
                 }
-            } 
-            
+            }
+
             //if all states reject this task then there is no need for it here anymore
             //returns true if the task is no longer needed
             public bool IsTaskIsUseless(BTTask taskToCheck)
@@ -241,6 +245,16 @@ namespace BT_and_RL
                     }
                 }
                 if(rejectCount == states.Count)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            //checks if the task has been rejected from the current state
+            private bool CheckIfRejected(BTTask task)
+            {
+                if (states[CurrentState].CheckIfRejected(task.GetType()))
                 {
                     return true;
                 }
@@ -262,9 +276,13 @@ namespace BT_and_RL
                 System.Random random = CustomExtensions.ThreadSafeRandom.ThisThreadsRandom;
                 if ((float)random.NextDouble() < states[CurrentState].Epsilon)
                 {
-                    CurrentActionIndex = random.Next(0, children.Count);
-                    CurrentActionName = children[CurrentActionIndex].GetType().Name;    //random
-
+                    int count = 0;
+                    do
+                    {
+                        CurrentActionIndex = random.Next(0, children.Count);
+                        CurrentActionName = children[CurrentActionIndex].GetType().Name;    //random
+                        count++;
+                    } while (CheckIfRejected(children[m_currentActionIndex]));
                 }
                 else
                 {
@@ -291,6 +309,7 @@ namespace BT_and_RL
                 return bestAction;
             }
 
+            //Uses the Q-Learning formula to caluclate the new q-value and returns it
             protected float GetNewQValue(float reward, string maxArg)
             {
                 return (1 - LearningRate) * states[PreviousState].GetScoresList()[CurrentActionName] + LearningRate * (reward + GammaDiscountFactor * states[CurrentState].GetScoresList()[maxArg]);
@@ -303,9 +322,12 @@ namespace BT_and_RL
         {
             [SerializeField]
             private string m_stateName;
+
             [SerializeField]
             private Dictionary<string, float> m_scoreValues;    //relates an action (by its name) to a q value
+
             private HashSet<Type> rejectedActions;  //stores any actions that are so bad that they should be avoided
+
             [SerializeField]
             private float m_epsilon; //The policy value for this state
             public float Epsilon

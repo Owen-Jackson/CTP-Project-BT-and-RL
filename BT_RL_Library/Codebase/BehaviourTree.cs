@@ -101,9 +101,11 @@ namespace BT_and_RL
             [SerializeField]
             protected string taskName;
 
+            protected HashSet<int> compatibility;   //stores the situations that this task can be applied in (links to an enum defined in the game's project)
+
             public BTTask()
             {
-
+                compatibility = new HashSet<int>();
             }
             
             //called when first ticked to set it as running
@@ -131,6 +133,19 @@ namespace BT_and_RL
             public string GetName()
             {
                 return taskName;
+            }
+
+            //this checks if the task is compatible with the node that is trying to add it (for RL purposes)
+            public bool IsTaskCompatible(HashSet<int> compareWith)
+            {
+                foreach(int num in compareWith)
+                {
+                    if(compatibility.Contains(num))
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
         }
 
