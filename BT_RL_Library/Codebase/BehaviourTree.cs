@@ -100,6 +100,8 @@ namespace BT_and_RL
             protected StatusValue status;
             [SerializeField]
             protected string taskName;
+            [SerializeField]
+            protected int treeDepth;
 
             protected HashSet<int> compatibility;   //stores the situations that this task can be applied in (links to an enum defined in the game's project)
 
@@ -135,6 +137,16 @@ namespace BT_and_RL
                 return taskName;
             }
 
+            public int GetTreeDepth()
+            {
+                return treeDepth;
+            }
+
+            public void SetTreeDepth(int depth)
+            {
+                treeDepth = depth;
+            }
+
             //this checks if the task is compatible with the node that is trying to add it (for RL purposes)
             public bool IsTaskCompatible(HashSet<int> compareWith)
             {
@@ -163,11 +175,10 @@ namespace BT_and_RL
         [Serializable]
         public abstract class BTAction : BTTask
         {
-            public BTAction()
-            {
-
-            }
+            public BTAction() { }
         }
+
+        #region Composites
 
         //A composite task that stops at first successful action
         [Serializable]
@@ -176,6 +187,8 @@ namespace BT_and_RL
             protected int currentChildIndex = 0;
             [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
+
+            public BTSelector() { }
 
             public BTSelector(List<BTTask> tasks)
             {
@@ -216,12 +229,15 @@ namespace BT_and_RL
 
         }
 
+        /*
         //Selector that randomises list before checking
         [Serializable]
         public class BTShuffleSelector : BTTask
         {
             [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
+
+            public BTShuffleSelector() { }
 
             public BTShuffleSelector(List<BTTask> tasks)
             {
@@ -251,6 +267,7 @@ namespace BT_and_RL
                 }
             }
         }
+        */
 
         //A composite task that stops at first failed action
         [Serializable]
@@ -259,6 +276,8 @@ namespace BT_and_RL
             protected int currentChildIndex = 0;
             [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
+
+            public BTSequence() { }
 
             public BTSequence(List<BTTask> tasks)
             {
@@ -298,12 +317,15 @@ namespace BT_and_RL
             }
         }
 
+        /*
         //Sequence that randomises list before checking
         [Serializable]
         public class BTShuffleSequence : BTTask
         {
             [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
+
+            public BTShuffleSequence() { }
 
             public BTShuffleSequence(List<BTTask> tasks)
             {
@@ -344,6 +366,8 @@ namespace BT_and_RL
             StatusValue result;
             [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
+
+            public BTParallel() { }
 
             public BTParallel(List<BTTask> tasks)
             {
@@ -404,7 +428,10 @@ namespace BT_and_RL
             }
 
         }
+        */
+        #endregion
 
+        #region Decorators
         //A decorator task that only has one child
         public class BTDecorator : BTTask
         {
@@ -431,6 +458,7 @@ namespace BT_and_RL
             }
         }
 
+        /*
         //Decorator that inverts the its child's return value
         [Serializable]
         public class BTInverter : BTDecorator
@@ -481,6 +509,8 @@ namespace BT_and_RL
                 }
                 return StatusValue.FAILED;
             }
-        }        
+        }
+        */
+        #endregion
     }
 }

@@ -18,7 +18,7 @@ namespace BT_and_RL
             protected Dictionary<string, StateClass> states;
 
             [SerializeField]
-            private int m_stepsCompleted = 0;
+            private int m_stepsCompleted = 0;   //how many times this has been ticked so far this episode
             public int StepsCompleted
             {
                 get
@@ -32,7 +32,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private int m_stepsInEpisode = 200;
+            private int m_stepsInEpisode = 1000;    //how many times this algorithm is stepped through in a single episode 
             public int StepsInEpisode
             {
                 get
@@ -46,7 +46,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private float m_gammaDiscountFactor = 0.8f;
+            private float m_gammaDiscountFactor = 0.8f; //determines the importance of future rewards
             public float GammaDiscountFactor
             {
                 get
@@ -118,7 +118,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private string m_currentState;
+            private string m_currentState;  //which state the agent is currently in (used to index states dictionary)
             public string CurrentState
             {
                 get
@@ -132,7 +132,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private string m_previousState;
+            private string m_previousState; //the state that the agent was previously in (used to index states dictionary)
             public string PreviousState
             {
                 get
@@ -146,7 +146,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private string m_currentActionName;
+            private string m_currentActionName; //the name of the action that is being performed (used to index the actions dictionary for the current state)
             public string CurrentActionName
             {
                 get
@@ -160,7 +160,7 @@ namespace BT_and_RL
             }
 
             [SerializeField]
-            private int m_currentActionIndex;
+            private int m_currentActionIndex;   //the index of the action being performed
             public int CurrentActionIndex
             {
                 get
@@ -173,30 +173,141 @@ namespace BT_and_RL
                 }
             }
 
+            public RLSelector()
+            {
+
+            }
             public RLSelector(List<BTTask> tasks, int numOfSteps) : base(tasks)
             {
                 m_stepsInEpisode = numOfSteps;
             }
-
             public RLSelector(List<BTTask> tasks, int numOfSteps, float minEpsilon) : base(tasks)
             {
                 m_stepsInEpisode = numOfSteps;
                 m_minEpsilon = minEpsilon;
             }
-
             public RLSelector(List<BTTask> tasks, int numOfSteps, float minEpsilon, float discountRate) : base(tasks)
             {
                 m_stepsInEpisode = numOfSteps;
                 m_minEpsilon = minEpsilon;
                 m_gammaDiscountFactor = discountRate;
             }
-
             public RLSelector(List<BTTask> tasks, int numOfSteps, float minEpsilon, float discountRate, float learningRate) : base(tasks)
             {
                 m_stepsInEpisode = numOfSteps;
                 m_minEpsilon = minEpsilon;
                 m_gammaDiscountFactor = discountRate;
                 m_learningRate = learningRate;
+            }
+
+            //This is the general tick function, variations are made by overriding the FirstTimeInit, GetState and GetReward functions
+            public override StatusValue Tick(Blackboard blackboard)
+            {
+                FirstTimeInit(blackboard);
+                //get the current state
+                GetState(blackboard);
+
+                //see if we are adding a new task
+                //check that we can add at this tree depth
+                if (treeDepth <= 5)
+                {
+                    if (children.Count == 0 || CustomExtensions.ThreadSafeRandom.ThisThreadsRandom.NextDouble() < states[CurrentState].Epsilon)
+                    {
+                        Type addType = ActionPool.Instance.GetRandomAction();
+                        //if this node doesn't already have this task
+                        if (children.Find(t => t.GetType().Name == addType.Name) == null)
+                        {
+                            //if this state has not rejected this task
+                            if (!states[CurrentState].CheckIfRejected(addType))
+                            {
+                                //add it
+                                AddTask(addType.Name);
+
+                                //set its depth (the new action will be indexed at the back of the list)
+                                children[children.Count - 1].SetTreeDepth(treeDepth + 1);
+
+                                //if this state has not seen this task before
+                                if (!states[CurrentState].GetScoresList().ContainsKey(addType.Name))
+                                {
+                                    //add it to this state
+                                    states[CurrentState].AddAction(addType.Name);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    return StatusValue.FAILED;
+                }
+
+                //select which action to use
+                CheckIfUsingRandomAction();
+
+                //perform the selected action
+                status = children[CurrentActionIndex].Tick(blackboard);
+
+                //get the reward based on this state and the previous state
+                float reward = GetReward(blackboard);
+
+                //update the states
+                PreviousState = CurrentState;
+
+                //update the Q value table
+                string maxArg = FindBestAction();
+                float newQ = GetNewQValue(reward, maxArg);
+                states[PreviousState].GetScoresList()[CurrentActionName] = newQ;
+
+                //decrement number of episodes left
+                states[PreviousState].EpisodeCount--;
+                StepsCompleted++;
+
+                //check whether to reject the task we just performed
+                if(ShouldActionBeRejected(blackboard))
+                {
+                    states[CurrentState].RejectAction(children[CurrentActionIndex].GetType());
+                }
+
+                //check if this task should be remove from this node entirely (i.e. it will never be useful)
+                if(IsTaskUseless(children[CurrentActionIndex]))
+                {
+                    children.RemoveAt(CurrentActionIndex);
+                }
+
+                //return the node's status
+                return status;
+            }
+
+            //override this to setup any values that might be needed in future iterations
+            public virtual void FirstTimeInit(Blackboard blackboard)
+            {
+                //initialise values here
+            }
+
+            //function to be overridden by inherited classes. It uses user-defined conditions to get a state
+            public virtual void GetState(Blackboard blackboard)
+            {
+                //make CurrentState = whatever the result is
+            }
+
+            //override this to get the reward for the performing this state-action pair
+            public virtual float GetReward(Blackboard blackboard)
+            {
+                //make reward = the reward here
+                return 0;
+            }
+
+            //override this with a metric for rejecting a task, e.g. score thresholds
+            public virtual bool ShouldActionBeRejected(Blackboard blackboard)
+            {
+                //check whether this action should be rejected
+                return false;
+            }
+
+            //used for debug and to show off the final learned values
+            public void OutputQTable()
+            {
+                //add code here later
             }
 
             //Add a new task to the selector
@@ -234,7 +345,7 @@ namespace BT_and_RL
 
             //if all states reject this task then there is no need for it here anymore
             //returns true if the task is no longer needed
-            public bool IsTaskIsUseless(BTTask taskToCheck)
+            public bool IsTaskUseless(BTTask taskToCheck)
             {
                 int rejectCount = 0;
                 foreach(StateClass state in states.Values)
@@ -455,7 +566,7 @@ namespace BT_and_RL
                 System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 for (int i = 0; i < assemblies.Length; i++)
                 {
-                    Type[] actions = assemblies[i].GetTypes().Where(t => t.IsSubclassOf(typeof(BTAction))).ToArray();
+                    Type[] actions = assemblies[i].GetTypes().Where(t => t.IsSubclassOf(typeof(BTTask))).ToArray();
                     for (int j = 0; j < actions.Length; j++)
                     {
                         //Debug.Log("adding " + actions[j].Name + " to the action pool");
