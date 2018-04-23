@@ -25,7 +25,7 @@ namespace BT_and_RL
         [Serializable]
         public class Blackboard
         {
-            public Dictionary<string, object> memory;
+            private Dictionary<string, object> memory;
 
             public Blackboard()
             {
@@ -43,7 +43,7 @@ namespace BT_and_RL
 
             public void SetValue(string valueName, object newValue)
             {
-                if(memory.ContainsKey(valueName))
+                if (memory.ContainsKey(valueName))
                 {
                     memory[valueName] = newValue;
                 }
@@ -72,23 +72,34 @@ namespace BT_and_RL
             {
                 blackboard = new Blackboard();
                 child = root;
+                root.SetTreeDepth(0);
+
                 BeginTree();
             }
 
             public void BeginTree()
             {
                 status = StatusValue.RUNNING;
+                child.Begin();
             }
 
             //Each frame ticks the tree once
             public void Tick()
             {
+                Blackboard.SetValue("QValueDebugString", "");
                 status = child.Tick(blackboard);
             }
 
             public StatusValue GetStatus()
             {
                 return status;
+            }
+
+            public string BuildDebugString()
+            {
+                string fullOutputString = "";
+                child.DisplayValues(ref fullOutputString);
+                return fullOutputString;
             }
         }
 
@@ -101,7 +112,7 @@ namespace BT_and_RL
             [SerializeField]
             protected string taskName;
             [SerializeField]
-            protected int treeDepth;
+            protected int treeDepth = 0;
 
             protected HashSet<int> compatibility;   //stores the situations that this task can be applied in (links to an enum defined in the game's project)
 
@@ -109,7 +120,7 @@ namespace BT_and_RL
             {
                 compatibility = new HashSet<int>();
             }
-            
+
             //called when first ticked to set it as running
             virtual public void Begin()
             {
@@ -137,22 +148,30 @@ namespace BT_and_RL
                 return taskName;
             }
 
+            virtual public void DisplayValues(ref string fullOutputString)
+            {
+                fullOutputString += "\n";
+                fullOutputString += new string('\t', treeDepth);
+                fullOutputString += GetName();
+                fullOutputString += "\t " + GetStatus();
+            }
+            
             public int GetTreeDepth()
             {
                 return treeDepth;
             }
 
-            public void SetTreeDepth(int depth)
+            virtual public void SetTreeDepth(int depth)
             {
                 treeDepth = depth;
-            }
+            }            
 
             //this checks if the task is compatible with the node that is trying to add it (for RL purposes)
             public bool IsTaskCompatible(HashSet<int> compareWith)
             {
-                foreach(int num in compareWith)
+                foreach (int num in compareWith)
                 {
-                    if(compatibility.Contains(num))
+                    if (compatibility.Contains(num))
                     {
                         return true;
                     }
@@ -188,16 +207,12 @@ namespace BT_and_RL
             [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
-            public BTSelector() { }
+            public BTSelector() { taskName = "BTSelector"; }
 
             public BTSelector(List<BTTask> tasks)
             {
+                taskName = "BTSelector";
                 children = tasks;
-            }
-
-            public void Initialise()
-            {
-                currentChildIndex = 0;
             }
 
             public override StatusValue Tick(Blackboard blackboard)
@@ -219,16 +234,132 @@ namespace BT_and_RL
                 return status;
             }
 
-            public virtual void AddTask(string taskName)
+            public override void DisplayValues(ref string fullOutputString)
             {
-                if(QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
+                base.DisplayValues(ref fullOutputString);
+                for(int i = 0; i < children.Count; i++)
                 {
-                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
+                    children[i].DisplayValues(ref fullOutputString);
                 }
             }
 
+            public override void SetTreeDepth(int depth)
+            {
+                base.SetTreeDepth(depth);
+                for(int i = 0; i < children.Count; i++)
+                {
+                    children[i].SetTreeDepth(depth + 1);
+                }
+            }
         }
 
+        //A composite task that stops at first failed action
+        [Serializable]
+        public class BTSequence : BTTask
+        {
+            protected int currentChildIndex = 0;
+            [SerializeField]
+            protected List<BTTask> children = new List<BTTask>();
+
+            public BTSequence() { taskName = "BTSequence"; }
+
+            public BTSequence(List<BTTask> tasks)
+            {
+                taskName = "BTSequence";
+                children = tasks;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    children[i].SetTreeDepth(treeDepth + 1);
+                }
+            }
+
+            public override StatusValue Tick(Blackboard blackboard)
+            {
+                currentChildIndex = 0;
+                for (int i = 0; i < children.Count(); i++)
+                {
+                    if (i == currentChildIndex)
+                    {
+                        status = children[i].Tick(blackboard);
+                        if (status != StatusValue.SUCCESS)
+                        {
+                            return status;
+                        }
+                    }
+                    currentChildIndex++;
+                }
+                status = StatusValue.SUCCESS;
+                return status;
+            }
+
+            public override void DisplayValues(ref string fullOutputString)
+            {
+                base.DisplayValues(ref fullOutputString);
+                for (int i = 0; i < children.Count; i++)
+                {
+                    children[i].DisplayValues(ref fullOutputString);
+                }
+            }
+
+            public override void SetTreeDepth(int depth)
+            {
+                base.SetTreeDepth(depth);
+                for (int i = 0; i < children.Count; i++)
+                {
+                    children[i].SetTreeDepth(depth + 1);
+                }
+            }
+        }
+        #endregion
+
+        #region Decorators
+        //A decorator task that only has one child
+        public class BTDecorator : BTTask
+        {
+            [SerializeField]
+            protected BTTask child = null;
+
+            public BTDecorator(BTTask task)
+            {
+                taskName = "BTDecorator";
+                child = task;
+            }
+
+            public override StatusValue Tick(Blackboard blackboard)
+            {
+                status = StatusValue.RUNNING;
+                if (child != null)
+                {
+                    status = child.Tick(blackboard);
+                    if (status != StatusValue.FAILED)
+                    {
+                        return status;
+                    }
+                }
+                return StatusValue.FAILED;
+            }
+
+            public override void DisplayValues(ref string fullOutputString)
+            {
+                base.DisplayValues(ref fullOutputString);
+                if(child != null)
+                {
+                    child.DisplayValues(ref fullOutputString);
+                }
+            }
+
+            public override void SetTreeDepth(int depth)
+            {
+                base.SetTreeDepth(depth);
+                if(child != null)
+                {
+                    child.SetTreeDepth(depth + 1);
+                }
+            }
+        }
+        #endregion
+
+        #region Unused
         /*
         //Selector that randomises list before checking
         [Serializable]
@@ -258,66 +389,8 @@ namespace BT_and_RL
                 status = StatusValue.FAILED;
                 return status;
             }
-
-            public void AddTask(string taskName)
-            {
-                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
-                {
-                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
-                }
-            }
         }
-        */
-
-        //A composite task that stops at first failed action
-        [Serializable]
-        public class BTSequence : BTTask
-        {
-            protected int currentChildIndex = 0;
-            [SerializeField]
-            protected List<BTTask> children = new List<BTTask>();
-
-            public BTSequence() { }
-
-            public BTSequence(List<BTTask> tasks)
-            {
-                children = tasks;
-            }
-
-            public void Initialise()
-            {
-                currentChildIndex = 0;
-            }
-
-            public override StatusValue Tick(Blackboard blackboard)
-            {
-                currentChildIndex = 0;
-                for(int i = 0; i < children.Count(); i++)
-                {
-                    if (i == currentChildIndex)
-                    {
-                        status = children[i].Tick(blackboard);
-                        if (status != StatusValue.SUCCESS)
-                        {
-                            return status;
-                        }
-                    }
-                    currentChildIndex++;
-                }
-                status = StatusValue.SUCCESS;
-                return status;
-            }
-
-            public virtual void AddTask(string taskName)
-            {
-                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
-                {
-                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
-                }
-            }
-        }
-
-        /*
+       
         //Sequence that randomises list before checking
         [Serializable]
         public class BTShuffleSequence : BTTask
@@ -345,14 +418,6 @@ namespace BT_and_RL
                 }
                 status = StatusValue.SUCCESS;
                 return status;
-            }
-
-            public void AddTask(string taskName)
-            {
-                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
-                {
-                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
-                }
             }
         }
 
@@ -419,46 +484,8 @@ namespace BT_and_RL
                     c.Terminate();
                 }
             }
-            public void AddTask(string taskName)
-            {
-                if (QLearning.ActionPool.Instance.actionPool.ContainsKey(taskName))
-                {
-                    children.Add((BTTask)Activator.CreateInstance(QLearning.ActionPool.Instance.actionPool[taskName]));
-                }
-            }
-
-        }
-        */
-        #endregion
-
-        #region Decorators
-        //A decorator task that only has one child
-        public class BTDecorator : BTTask
-        {
-            [SerializeField]
-            protected BTTask child = null;
-
-            public BTDecorator(BTTask task)
-            {
-                child = task;
-            }
-
-            public override StatusValue Tick(Blackboard blackboard)
-            {
-                status = StatusValue.RUNNING;
-                if(child != null)
-                {
-                    status = child.Tick(blackboard);
-                    if (status != StatusValue.FAILED)
-                    {
-                        return status;
-                    }
-                }
-                return StatusValue.FAILED;
-            }
         }
 
-        /*
         //Decorator that inverts the its child's return value
         [Serializable]
         public class BTInverter : BTDecorator

@@ -43,9 +43,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionPool.cs" />
     <Compile Include="BehaviourTree.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QLearning.cs" />
     <Compile Include="ReinforcementLearning.cs" />
   </ItemGroup>
   <ItemGroup>
