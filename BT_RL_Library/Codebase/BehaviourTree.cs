@@ -113,6 +113,8 @@ namespace BT_and_RL
             protected string taskName;
             [SerializeField]
             protected int treeDepth = 0;
+            [SerializeField]
+            protected bool poolable = false;    //set to true if this task can be pooled
 
             protected HashSet<int> compatibility;   //stores the situations that this task can be applied in (links to an enum defined in the game's project)
 
@@ -148,12 +150,17 @@ namespace BT_and_RL
                 return taskName;
             }
 
+            public bool CheckIfPoolable()
+            {
+                return poolable;
+            }
+
             virtual public void DisplayValues(ref string fullOutputString)
             {
                 fullOutputString += "\n";
                 fullOutputString += new string('\t', treeDepth);
                 fullOutputString += GetName();
-                fullOutputString += "\t " + GetStatus();
+                //fullOutputString += "\t " + GetStatus();
             }
             
             public int GetTreeDepth()

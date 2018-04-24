@@ -152,12 +152,6 @@ namespace BT_and_RL.QLearning
         public QLearningBrain(List<BTTask> tasks)
         {
             states = new Dictionary<string, StateClass>();
-
-            for (int i = 0; i < tasks.Count; i++)
-            {
-                string taskName = tasks[i].GetName();
-                states.Add(taskName, new StateClass(taskName));
-            }
         }
 
         public Dictionary<string, StateClass> GetStates()
@@ -265,6 +259,12 @@ namespace BT_and_RL.QLearning
             //get the name of the highest valued action
             bestAction = states[PreviousStateName].GetScoresList().FirstOrDefault(x => x.Value == states[PreviousStateName].GetScoresList().Values.Max()).Key;
             return bestAction;
+        }
+
+        //returns the score of the highest scoring action
+        public float GetHighScore(string stateName)
+        {
+            return states[stateName].GetScore(FindBestAction());
         }
 
         //calculate the new Q value for the action using the Q-Learning formula
@@ -429,17 +429,17 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        public void RejectAction(string actionNanme)
+        public void RejectAction(string actionName)
         {
-            if (!rejectedActions.Contains(actionNanme))
+            if (!rejectedActions.Contains(actionName))
             {
-                rejectedActions.Add(actionNanme);
+                rejectedActions.Add(actionName);
             }
         }
 
-        public bool CheckIfRejected(string actionNanme)
+        public bool CheckIfRejected(string actionName)
         {
-            if (rejectedActions.Contains(actionNanme))
+            if (rejectedActions.Contains(actionName))
             {
                 return true;
             }

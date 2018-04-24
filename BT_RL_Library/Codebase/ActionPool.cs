@@ -8,25 +8,66 @@ using BT_and_RL.Behaviour_Tree;
 
 namespace BT_and_RL.QLearning
 {
-    //object factory class to instantiate actions when dynamically added to the behaviour tree
-    public class ActionFactory
+    //class to instantiate actions when dynamically added to the behaviour tree
+    public class ActionPool
     {
-        protected Dictionary<string, BTTask> actionPool;
+        private static ActionPool instance;
+        public static ActionPool Instance
+        {
+            get
+            {
+                if(instance == null)
+                {
+                    instance = new ActionPool();
+                }
+                return instance;
+            }
+        }
 
+        //this stores all of the actions that can be added
+        protected Dictionary<string, Type> actionDictionary;
+
+        public ActionPool()
+        {
+            actionDictionary = new Dictionary<string, Type>();
+
+            //initialise the action pool with the types of actions that will be used
+            System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for (int i = 0; i < assemblies.Length; i++)
+            {                
+                //create an array for all of the actions that the user has implemented
+                Type[] actions = assemblies[i].GetTypes().Where(t => t.IsSubclassOf(typeof(BTAction))).ToArray();
+                for (int j = 0; j < actions.Length; j++)
+                {
+                    //create a temporary instance of the action class so that its name can be retrieved
+                    BTTask task = (BTTask)assemblies[i].CreateInstance(actions[j].Name);
+                    if (task.CheckIfPoolable())
+                    {
+                        if (!actionDictionary.ContainsKey(task.GetName()))
+                        {
+                            actionDictionary.Add(task.GetName(), actions[j]);
+                        }
+                    }
+                }                
+            }
+        }         
+
+        //returns the specified action from the pool
         public object GetAction(string name)
         {
-            if (actionPool.ContainsKey(name))
+            if (actionDictionary.ContainsKey(name))
             {
-                return actionPool[name];
+                return System.Reflection.Assembly.GetAssembly(actionDictionary[name]).CreateInstance(actionDictionary[name].Name);
             }
 
             return "action not found";
         }
 
-        public BTTask GetRandomAction()
+        //returns a random action from the pool
+        public object GetRandomAction()
         {
-            BTTask get = actionPool.Values.ElementAt(CustomExtensions.ThreadSafeRandom.ThisThreadsRandom.Next(0, actionPool.Count));
-            return get;
+            Type get = actionDictionary.Values.ElementAt(CustomExtensions.ThreadSafeRandom.ThisThreadsRandom.Next(0, actionDictionary.Count));
+            return System.Reflection.Assembly.GetAssembly(get).CreateInstance(get.Name);
         }
     }
 

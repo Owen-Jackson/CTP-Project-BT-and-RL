@@ -16,6 +16,7 @@ namespace BT_and_RL
         {
             protected QLearningBrain learner;
             protected int indexOfSelectedAction = 0;
+            protected bool isNodeDynamic = false;   //set this to true to allow this node to automatically add and remove children
 
             //minimum number of times an action must be done before checking if it should be rejected
             //should avoid prematurely rejecting ok actions
@@ -58,6 +59,23 @@ namespace BT_and_RL
                     //get the current state for the learner
                     learner.SetCurrentStateName(GetState(blackboard));
 
+                    //random probability to add an action
+                    if(isNodeDynamic)
+                    {
+                        System.Random random = CustomExtensions.ThreadSafeRandom.ThisThreadsRandom;
+                        if (children.Count == 0 || random.NextDouble() < 0.25f)
+                        {
+                            //retrieve a random task from the action pool
+                            BTTask newTask = (BTTask)ActionPool.Instance.GetRandomAction();
+                            //add the task if it is not rejected by the current state
+                            if (!learner.GetPreviousState().CheckIfRejected(newTask.GetName()))
+                            {
+                                //Debug.Log("learner has not rejected: " + newTask.GetName());
+                                AddTask(newTask);
+                            }
+                        }
+                    }
+
                     //get the index of the action that the RL decides to use
                     indexOfSelectedAction = learner.SelectAnAction(children);
                 }
@@ -93,7 +111,13 @@ namespace BT_and_RL
                     //check if rejected
                     if(ShouldActionBeRejected(blackboard))
                     {
+                        //reject from this state
                         learner.GetPreviousState().RejectAction(children[indexOfSelectedAction].GetName());
+                        //if all states reject the action then remove it from this node
+                        if (ShouldActionBeRemoved(learner.CurrentActionName))
+                        {
+                            children.RemoveAt(learner.CurrentActionIndex);
+                        }
                     }
                 }
 
@@ -101,7 +125,7 @@ namespace BT_and_RL
 
                 return StatusValue.SUCCESS;
             }
-                
+
             //override this to setup any values that might be needed in future iterations
             public virtual void FirstTimeInit(Blackboard blackboard)
             {
@@ -122,10 +146,56 @@ namespace BT_and_RL
                 return 0.0f;
             }
 
+            //adds an action as a child to this node
+            public void AddTask(BTTask newAction)
+            {
+                for(int i = 0; i < children.Count; i++)
+                {
+                    if(children[i].GetName() == newAction.GetName())
+                    {
+                        return;
+                    }
+                }
+                children.Add(newAction);
+                newAction.SetTreeDepth(treeDepth + 1);
+            }
+
+            //removes a task from this node's children
+            public void RemoveTask(string taskName)
+            {
+                for(int i = 0; i < children.Count; i++)
+                {
+                    if(children[i].GetName() == taskName)
+                    {
+                        children.RemoveAt(i);
+                        return;
+                    }
+                }
+            }
+
             //override this with a metric for rejecting a task, e.g. score thresholds
             public virtual bool ShouldActionBeRejected(Blackboard blackboard)
             {
                 //check whether this action should be rejected
+                return false;
+            }
+
+            //if the action just used has been rejected in all states then we can remove it from the tree.
+            protected bool ShouldActionBeRemoved(string actionToCheck)
+            {
+                int rejectCount = 0;
+                foreach(StateClass state in learner.GetStates().Values)
+                {
+                    if(state.CheckIfRejected(actionToCheck))
+                    {
+                        rejectCount++;
+                    }
+                }
+                
+                if(rejectCount == learner.GetStates().Count)
+                {
+                    return true;
+                }
                 return false;
             }
 
@@ -141,7 +211,6 @@ namespace BT_and_RL
                 fullOutputString += "\n";
                 fullOutputString += new string('\t', treeDepth);
                 fullOutputString += GetName();
-                fullOutputString += "\t " + GetStatus();
 
                 for (int i = 0; i < children.Count; i++)
                 {
