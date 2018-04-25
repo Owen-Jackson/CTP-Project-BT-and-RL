@@ -1,1 +1,6 @@
+C:\Users\Owen\Desktop\Assignments Y3\Creative Technology Project (Dissertation)\Codebase\BT_RL_Library\Codebase\bin\Release\Codebase.dll
+C:\Users\Owen\Desktop\Assignments Y3\Creative Technology Project (Dissertation)\Codebase\BT_RL_Library\Codebase\bin\Release\Codebase.pdb
 C:\Users\Owen\Desktop\Assignments Y3\Creative Technology Project (Dissertation)\Codebase\BT_RL_Library\Codebase\obj\Release\Codebase.csproj.CoreCompileInputs.cache
+C:\Users\Owen\Desktop\Assignments Y3\Creative Technology Project (Dissertation)\Codebase\BT_RL_Library\Codebase\obj\Release\Codebase.dll
+C:\Users\Owen\Desktop\Assignments Y3\Creative Technology Project (Dissertation)\Codebase\BT_RL_Library\Codebase\obj\Release\Codebase.pdb
+C:\Users\Owen\Desktop\Assignments Y3\Creative Technology Project (Dissertation)\Codebase\BT_RL_Library\Codebase\obj\Release\Codebase.csprojResolveAssemblyReference.cache

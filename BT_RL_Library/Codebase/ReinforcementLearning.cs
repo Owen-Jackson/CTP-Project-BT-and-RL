@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 using BT_and_RL.Behaviour_Tree;
 
 namespace BT_and_RL
@@ -22,7 +21,6 @@ namespace BT_and_RL
             //should avoid prematurely rejecting ok actions
             protected int minimumActionPerformances = 30;
 
-            [SerializeField]
             protected bool isInitialised = false; //used when checking if this node's values have been initialised
 
             //default and parameterised constructors
@@ -32,7 +30,7 @@ namespace BT_and_RL
             }
             public RLSelector(List<BTTask> tasks) : base(tasks)
             {
-                learner = new QLearningBrain(tasks);
+                learner = new QLearningBrain();
                 for(int i = 0; i < tasks.Count; i++)
                 {
                     children[i].SetTreeDepth(treeDepth + 1);
@@ -215,28 +213,24 @@ namespace BT_and_RL
                 for (int i = 0; i < children.Count; i++)
                 {
                     children[i].DisplayValues(ref fullOutputString);
-                    if(i == indexOfSelectedAction)
-                    {
-                        fullOutputString += " <--";
-                    }
                 }
             }
 
             //used for displaying the q values that the agent has learrned
             public void QLearningValues(Blackboard blackboard)
             {
-                string fullOutputString = (string)blackboard.GetValue("QValueDebugString");
+                string fullOutputString = "";
                 fullOutputString += learner.PreviousStateName + "\n";
+                float highScore = learner.GetHighScore(learner.PreviousStateName);
                 for (int i = 0; i < children.Count; i++)
                 {
                     fullOutputString += children[i].GetName() + "\t";
                     if (learner.GetPreviousState() != null)
                     {
-                        fullOutputString += "\tq-value: " + learner.GetPreviousState().GetScore(children[i].GetName()) + "\tnumber of uses: " + learner.GetPreviousState().GetActionUseCount(children[i].GetName());
+                        fullOutputString += "\tq-value: " + Math.Round((learner.GetPreviousState().GetScore(children[i].GetName()) / highScore), 2)  + "\tnumber of uses: " + learner.GetPreviousState().GetActionUseCount(children[i].GetName());
                     }
                     fullOutputString += "\n";
                 }
-                //Debug.Log("full q value string: " + fullOutputString);
                 blackboard.SetValue("QValueDebugString", fullOutputString);
             }
 

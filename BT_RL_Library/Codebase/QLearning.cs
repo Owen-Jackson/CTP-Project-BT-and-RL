@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 
 using BT_and_RL.Behaviour_Tree;
 
 namespace BT_and_RL.QLearning
 {
+    //This class has all of the Q-Learning functionality. Add it as a component to a BT node to make it an RL node 
     [Serializable]
     public class QLearningBrain
     {
         protected Dictionary<string, StateClass> states;    //all of the states that the agent can be in
 
-        private int stepsCompleted = 0;   //how many times this has been ticked so far this episode
+        //how many times this has been ticked so far this episode
+        private int stepsCompleted = 0; 
         public int StepsCompleted
         {
             get
@@ -27,7 +28,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private int stepsInEpisode = 1000;    //how many times this algorithm is stepped through in a single episode 
+        //how many times this algorithm is stepped through in a single episode 
+        private int stepsInEpisode = 1000;
         public int StepsInEpisode
         {
             get
@@ -40,7 +42,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private float gammaDiscountFactor = 0.8f; //determines the importance of future rewards
+        //determines the importance of future rewards
+        private float gammaDiscountFactor = 0.8f;
         public float GammaDiscountFactor
         {
             get
@@ -53,7 +56,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private float learningRate = 0.5f;    //How fast this node learns
+        //How fast this node learns
+        private float learningRate = 0.5f;
         public float LearningRate
         {
             get
@@ -66,7 +70,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private float maxEpsilon = 1.0f; //probability of selecting a random action
+        //probability of selecting a random action
+        private float maxEpsilon = 1.0f;
         public float MaxEpsilon
         {
             get
@@ -79,7 +84,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private float minEpsilon = 0.1f;  //min epsilon value
+        //min epsilon value
+        private float minEpsilon = 0.1f;
         public float MinEpsilon
         {
             get
@@ -92,7 +98,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private string currentStateName = "";  //which state the agent is currently in (used to index states dictionary)
+        //which state the agent is currently in (used to index states dictionary)
+        private string currentStateName = "";
         public string CurrentStateName
         {
             get
@@ -105,7 +112,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private string previousStateName = ""; //the state that the agent was previously in (used to index states dictionary)
+        //the state that the agent was previously in (used to index states dictionary)
+        private string previousStateName = "";
         public string PreviousStateName
         {
             get
@@ -118,7 +126,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private string currentActionName = ""; //the name of the action that is being performed (used to index the actions dictionary for the current state)
+        //the name of the action that is being performed (used to index the actions dictionary for the current state)
+        private string currentActionName = "";
         public string CurrentActionName
         {
             get
@@ -131,7 +140,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        private int currentActionIndex;   //the index of the action being performed
+        //the index of the action being performed
+        private int currentActionIndex;
         public int CurrentActionIndex
         {
             get
@@ -149,16 +159,12 @@ namespace BT_and_RL.QLearning
             states = new Dictionary<string, StateClass>();
         }
 
-        public QLearningBrain(List<BTTask> tasks)
-        {
-            states = new Dictionary<string, StateClass>();
-        }
-
         public Dictionary<string, StateClass> GetStates()
         {
             return states;
         }
 
+        //add a new state to the current set of states
         public void AddState(string newStateName, List<BTTask> tasks)
         {
             if (!states.ContainsKey(newStateName))
@@ -167,11 +173,13 @@ namespace BT_and_RL.QLearning
             }
         }
 
+        //add a new action type to the current state
         public void AddAction(string actionName)
         {
             states[CurrentStateName].AddAction(actionName);
         }
 
+        //getters and setters for the current and previous states
         public StateClass GetCurrentState()
         {
             if (states.ContainsKey(CurrentStateName))
@@ -218,17 +226,18 @@ namespace BT_and_RL.QLearning
         //returns the index of the action to perform
         public int SelectAnAction(List<BTTask> tasks)
         {
-            //create an rng using the thread safe random extension
+            //create an RNG using the thread safe random extension
             System.Random randomNumberGen = CustomExtensions.ThreadSafeRandom.ThisThreadsRandom;
             if ((float)randomNumberGen.NextDouble() < states[CurrentStateName].Epsilon)
             {
-                //limits the number of attempts to break out of infinite loop
+                //limits the number of attempts to prevent infinite loops
                 int count = 0;
                 do
                 {
+                    //randomly pick one of the currently available actions
                     CurrentActionIndex = randomNumberGen.Next(0, tasks.Count);
-                    CurrentActionName = tasks[CurrentActionIndex].GetName();    //random
-                    //check that the current state does not have this action
+                    CurrentActionName = tasks[CurrentActionIndex].GetName();
+                    //add this action if the current state does not know about it
                     if(!states[CurrentStateName].GetScoresList().ContainsKey(CurrentActionName))
                     {
                         states[CurrentStateName].AddAction(CurrentActionName);
@@ -239,15 +248,13 @@ namespace BT_and_RL.QLearning
             else
             {
                 //Find the best action from the Q value table
-                CurrentActionName = FindBestAction();   //states[CurrentStateName].GetScoresList().Where(x => x.Value == states[CurrentStateName].GetScoresList().Max(y => y.Value)).Select(z => z.Key).First(); //max value
+                CurrentActionName = FindBestAction();
                 CurrentActionIndex = tasks.IndexOf(tasks.Find(x => x.GetName() == CurrentActionName));
-                //Debug.Log("current best action: " + CurrentActionName);
             }
             //decrease the epsilon value to reduce future probability
             if (states[CurrentStateName].Epsilon > MinEpsilon)
             {
                 states[CurrentStateName].Epsilon -= (1f - MinEpsilon) / StepsInEpisode;
-                //Debug.Log("current epsilon: " + states[CurrentStateName].Epsilon);
             }
             return CurrentActionIndex;
         }
@@ -274,12 +281,13 @@ namespace BT_and_RL.QLearning
                 + LearningRate * (reward + GammaDiscountFactor * states[CurrentStateName].GetScore(maxArg));
         }
 
+        //set the new q-value in the state-action table
         private void UpdateQValue(float newQValue)
         {
             states[PreviousStateName].SetScore(CurrentActionName, newQValue);
-            //states[PreviousStateName].Epsilon -= 1.0f / states[PreviousStateName].EpisodesToComplete;
         }
 
+        //update the q-value for the current state-action pair
         public void UpdateQValueTable(float reward)
         {
             string bestActionName = FindBestAction();
@@ -305,7 +313,7 @@ namespace BT_and_RL.QLearning
         private string stateName;
 
         private Dictionary<string, float> scoreValues;    //relates an action (by its name) to a q value
-        private Dictionary<string, int> actionUseCounts; //stores how many times each action has been performed
+        private Dictionary<string, int> actionUseCounts;  //stores how many times each action has been performed
 
         private HashSet<string> rejectedActions;  //stores any actions that are so bad that they should be avoided
 
@@ -335,8 +343,9 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        public bool DisplayedFinalResults { get; set; } = false;
+        //public bool DisplayedFinalResults { get; set; } = false;
 
+        //constructors
         public StateClass(string name)
         {
             stateName = name;
@@ -359,8 +368,10 @@ namespace BT_and_RL.QLearning
         {
             //dictionary to store the q value for each action in this state
             scoreValues = new Dictionary<string, float>();
+
             //stores how many times an action has been used
             actionUseCounts = new Dictionary<string, int>();
+
             //stores the actions that the agent has deemed useless in this state
             rejectedActions = new HashSet<string>();
         }
@@ -412,6 +423,7 @@ namespace BT_and_RL.QLearning
             scoreValues[actionName] = score;
         }
 
+        //increments the number of times this action has been used
         public void UpdateActionUseCount(string actionName)
         {
             if (actionUseCounts.ContainsKey(actionName))
@@ -420,7 +432,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
-        public void AddAction(string actionName) //Adds a new action if the state does not already contain it
+        //Adds a new action if the state does not already contain it
+        public void AddAction(string actionName)
         {
             if (!scoreValues.ContainsKey(actionName))
             {
@@ -429,6 +442,7 @@ namespace BT_and_RL.QLearning
             }
         }
 
+        //reject the action with the given name
         public void RejectAction(string actionName)
         {
             if (!rejectedActions.Contains(actionName))
@@ -437,6 +451,8 @@ namespace BT_and_RL.QLearning
             }
         }
 
+        //used when adding actions to avoid re-adding previously rejected actions
+        //also when checking whether to permanently remove an action from the node
         public bool CheckIfRejected(string actionName)
         {
             if (rejectedActions.Contains(actionName))

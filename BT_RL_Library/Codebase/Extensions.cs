@@ -7,6 +7,7 @@ using System.Threading;
 namespace CustomExtensions
 {
     //from Eric J. at https://stackoverflow.com/questions/273313/randomize-a-listt
+    //generates a random number for the current thread
     public static class ThreadSafeRandom
     {
         [ThreadStatic] private static System.Random local;
@@ -17,7 +18,8 @@ namespace CustomExtensions
     }
 
     //from Eric J. at https://stackoverflow.com/questions/273313/randomize-a-listt
-    public static class MyExtensions
+    //randomly shuffles a list
+    public static class Extensions
     {
         public static void Shuffle<T>(this IList<T> list)
         {
@@ -32,29 +34,4 @@ namespace CustomExtensions
             }
         }
     }
-
-    /*
-    //This is the base code for a non thread-safe singleton class, copy and paste into a class to make it singleton
-    public class Singleton
-    {        
-        private static Singleton instance;
-        public static Singleton Instance
-        {
-            get
-            {
-                if(instance == null)
-                {
-                    instance = new Singleton();
-                }
-                return instance;
-            }
-        }
-
-        public Singleton()
-        {
-
-        }
-    }
-    */
-
 }

@@ -3,7 +3,7 @@
   <Class Name="BT_and_RL.Behaviour_Tree.BTTask" Collapsed="true">
     <Position X="6.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAEAAAAAAAAAAAEAAAAEAAAAAAEAAAARAA=</HashCode>
+      <HashCode>AgQAAAAAAAIEAAAAEAAIAAAEQAAAEAAAAAAEgEAARAg=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -17,35 +17,21 @@
   <Class Name="BT_and_RL.Behaviour_Tree.BTSelector" Collapsed="true">
     <Position X="1" Y="1.75" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAACAAAAAAAQQAAAAAAAAAAAAAAACAAAAAAAAAQAA=</HashCode>
-      <FileName>BehaviourTree.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="BT_and_RL.Behaviour_Tree.BTShuffleSelector" Collapsed="true">
-    <Position X="5.5" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAACAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAACAAAAAgEAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTSequence" Collapsed="true">
     <Position X="12.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAACAAAAAAAQQAAAAAAAAAAAAAAACAAAAAAAAAQAA=</HashCode>
-      <FileName>BehaviourTree.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="BT_and_RL.Behaviour_Tree.BTShuffleSequence" Collapsed="true">
-    <Position X="3.25" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAACAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAACAAAAAgEAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTDecorator" Collapsed="true">
     <Position X="7.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAgEAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -56,31 +42,10 @@
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BT_and_RL.Behaviour_Tree.BTInverter" Collapsed="true">
-    <Position X="8.5" Y="3.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
-      <FileName>BehaviourTree.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="BT_and_RL.Behaviour_Tree.BTSemaphoreGuard" Collapsed="true">
-    <Position X="10.75" Y="3.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAA=</HashCode>
-      <FileName>BehaviourTree.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="BT_and_RL.Behaviour_Tree.BTParallel" Collapsed="true">
-    <Position X="6.5" Y="3.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAACAAAAAQAAQABAAAAAAAAAAAAAAAAAAEAAAASAA=</HashCode>
-      <FileName>BehaviourTree.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="BT_and_RL.Behaviour_Tree.BTTree" Collapsed="true">
     <Position X="4.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAQAAAAEAAAAAAAACIAAAEAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <HashCode>AAQAQAAAAEAAAAAAAACIAAAEAAAAAQAAAAAAAAAAQAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -89,6 +54,34 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAIAAAAgAAAAAAAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
       <FileName>BehaviourTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.QLearning.QLearningBrain" Collapsed="true">
+    <Position X="1.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>JAAAIEAACABAAACAAEIIiACAAAIiICAFAAIABiSgSAQ=</HashCode>
+      <FileName>QLearning.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.QLearning.StateClass" Collapsed="true">
+    <Position X="3" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQgAAEAAAAAAABAAIACAABAAgABSEgAEQAgAgAQgFAA=</HashCode>
+      <FileName>QLearning.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.QLearning.ActionPool" Collapsed="true">
+    <Position X="1.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAEAAAAAABAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>ActionPool.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BT_and_RL.QLearning.RLSelector" Collapsed="true">
+    <Position X="1" Y="3.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAADGAAABAAAAAIAAAAAAEAIADAABACAAACgEAAQCA=</HashCode>
+      <FileName>ReinforcementLearning.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Enum Name="BT_and_RL.Behaviour_Tree.StatusValue" Collapsed="true">

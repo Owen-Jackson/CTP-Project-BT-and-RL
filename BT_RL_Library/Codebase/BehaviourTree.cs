@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
-using UnityEngine;
 using CustomExtensions;
 
 namespace BT_and_RL
@@ -12,6 +11,7 @@ namespace BT_and_RL
     //namespace used for behaviour trees
     namespace Behaviour_Tree
     {
+        //each node in the tree returns one of these to mark it's current status
         public enum StatusValue
         {
             NULL = 0,
@@ -21,7 +21,6 @@ namespace BT_and_RL
         }
 
         //Blackboard class used by the tree to read and write information that this agent knows
-        //NOTE: Might not be thread-safe yet (will look into if it becomes a problem)
         [Serializable]
         public class Blackboard
         {
@@ -32,6 +31,7 @@ namespace BT_and_RL
                 memory = new Dictionary<string, object>();
             }
 
+            //Note: the returned value needs to be casted at the other end to the type we want
             public object GetValue(string valueName)
             {
                 if (memory.ContainsKey(valueName))
@@ -54,12 +54,11 @@ namespace BT_and_RL
             }
         }
 
-        //Class for the main tree to inherit from. This is the root node of the tree and it should only have one child
+        //Class for the main tree to inherit from. This should only have one child as the root node
         [Serializable]
         public class BTTree
         {
             protected StatusValue status;
-            [SerializeField]
             protected BTTask child;
             protected Blackboard blackboard;
             public Blackboard Blackboard
@@ -107,13 +106,9 @@ namespace BT_and_RL
         [Serializable]
         public class BTTask
         {
-            [SerializeField]
             protected StatusValue status;
-            [SerializeField]
             protected string taskName;
-            [SerializeField]
             protected int treeDepth = 0;
-            [SerializeField]
             protected bool poolable = false;    //set to true if this task can be pooled
 
             protected HashSet<int> compatibility;   //stores the situations that this task can be applied in (links to an enum defined in the game's project)
@@ -155,6 +150,7 @@ namespace BT_and_RL
                 return poolable;
             }
 
+            //used to write out the behaviour tree's structure
             virtual public void DisplayValues(ref string fullOutputString)
             {
                 fullOutputString += "\n";
@@ -211,7 +207,6 @@ namespace BT_and_RL
         public class BTSelector : BTTask
         {
             protected int currentChildIndex = 0;
-            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTSelector() { taskName = "BTSelector"; }
@@ -265,7 +260,6 @@ namespace BT_and_RL
         public class BTSequence : BTTask
         {
             protected int currentChildIndex = 0;
-            [SerializeField]
             protected List<BTTask> children = new List<BTTask>();
 
             public BTSequence() { taskName = "BTSequence"; }
@@ -323,7 +317,6 @@ namespace BT_and_RL
         //A decorator task that only has one child
         public class BTDecorator : BTTask
         {
-            [SerializeField]
             protected BTTask child = null;
 
             public BTDecorator(BTTask task)
