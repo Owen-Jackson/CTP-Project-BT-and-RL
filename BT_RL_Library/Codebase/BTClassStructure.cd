@@ -57,21 +57,21 @@
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.QLearning.QLearningBrain" Collapsed="true">
-    <Position X="1.25" Y="4.5" Width="1.5" />
+    <Position X="3" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>JAAAIEAACABAAACAAEIIiACAAAIiICAFAAIABiSgSAQ=</HashCode>
       <FileName>QLearning.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.QLearning.StateClass" Collapsed="true">
-    <Position X="3" Y="4.5" Width="1.5" />
+    <Position X="4.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQgAAEAAAAAAABAAIACAABAAgABSEgAEQAgAgAQgFAA=</HashCode>
+      <HashCode>AQgAAEAAAAAAABAAIACAABAAAABSEgAEQAgAgAQgFAA=</HashCode>
       <FileName>QLearning.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="BT_and_RL.QLearning.ActionPool" Collapsed="true">
-    <Position X="1.25" Y="5.5" Width="1.5" />
+    <Position X="6.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAABAAAAAAAAEAAAAAABAAAAAQAAAAAAAAAA=</HashCode>
       <FileName>ActionPool.cs</FileName>
